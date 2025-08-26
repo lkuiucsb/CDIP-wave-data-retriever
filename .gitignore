@@ -1,0 +1,12 @@
+# R specific
+.Rhistory
+.Rapp.history
+.RData
+.Ruserdata
+.Rproj.user
+
+# Downloaded data
+cdip_data/
+
+# Output files
+wave_data.csv
