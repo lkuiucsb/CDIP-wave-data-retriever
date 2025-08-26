@@ -60,8 +60,8 @@ install.packages(c("tidyverse", "lubridate", "ncdf4", "httr", "purrr", "furrr", 
     ```R
     wave_data <- process_cdip_data_for_sites(
       sites_file_path = "sites.csv",
-      start_date = "2017-09-01",
-      end_date = "2017-09-30"
+      start_date = "2023-09-01",
+      end_date = "2023-09-05"
     )
     ```
 
@@ -75,23 +75,7 @@ install.packages(c("tidyverse", "lubridate", "ncdf4", "httr", "purrr", "furrr", 
 
 ## Example
 
-```R
-# Load the script
-source("wave_CDIP.R")
-
-# Process the wave data for the sites in sites.csv
-wave_data <- process_cdip_data_for_sites(
-  sites_file_path = "sites.csv",
-  start_date = "2017-09-01",
-  end_date = "2017-09-30"
-)
-
-# Print the wave data
-print(wave_data)
-
-# Save the wave data to a CSV file
-write.csv(wave_data, "wave_data.csv", row.names = FALSE)
-```
+Please see the `run_example.R` script for an example of how to use the `process_cdip_data_for_sites` function.
 
 
 ## License
