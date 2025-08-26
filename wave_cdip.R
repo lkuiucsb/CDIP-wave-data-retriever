@@ -52,34 +52,11 @@ process_cdip_data_for_sites <- function(sites_file_path, start_date, end_date, o
     stop("Error reading sites file: ", e$message)
   })
 
-  # --- Step 2: Get CDIP station metadata ---
-  get_cdip_stations <- function() {
-    metadata_url <- "http://cdip.ucsd.edu/data_access/metadata.xml"
-    message("Downloading station metadata from CDIP...")
-    tryCatch({
-      response <- GET(metadata_url)
-      response$raise_for_status()
-      metadata_xml <- read_xml(content(response, "text"))
-      stations <- xml_find_all(metadata_xml, ".//station")
-      station_data <- map_df(stations, function(station) {
-        station_id <- xml_attr(station, "name")
-        latitude <- as.numeric(xml_attr(station, "latitude"))
-        longitude <- as.numeric(xml_attr(station, "longitude"))
-        # We are only interested in MOP stations for this script
-        if (grepl("MOP", station_id)) {
-          tibble(station = station_id, latitude = latitude, longitude = longitude)
-        } else {
-          NULL
-        }
-      })
-      message("Successfully downloaded and parsed station metadata.")
-      return(station_data)
-    }, error = function(e) {
-      stop("Error downloading or parsing station metadata: ", e$message)
-    })
-  }
-
-  cdip_stations <- get_cdip_stations()
+  # --- Step 2: Get CDIP station metadata from transect_coords.csv ---
+  cdip_stations <- read.csv("transect_coords.csv", header = FALSE) %>%
+    select(V2, V3, V4) %>%
+    rename(station = V2, longitude = V3, latitude = V4) %>%
+    mutate(latitude = as.numeric(latitude), longitude = as.numeric(longitude))
 
   if (is.null(cdip_stations) || nrow(cdip_stations) == 0) {
     message("Could not retrieve CDIP station metadata.")
@@ -152,16 +129,11 @@ process_cdip_data_for_sites <- function(sites_file_path, start_date, end_date, o
     nc_close(nc)
     df <- real_time %>%
       filter(time_idx == 1) %>%
-      mutate(Hs = hs)
-    daily_df <- df %>%
-      mutate(date_utc = as.Date(rltime)) %>%
-      group_by(date_utc) %>%
-      summarise(
-        Mean_Hs_m = mean(Hs, na.rm = TRUE),
-        .groups = "drop"
-      ) %>%
+      mutate(Hs = hs) %>%
+      select(rltime, Hs) %>%
+      rename(time_utc = rltime, Hs_m = Hs) %>%
       mutate(station = station)
-    return(daily_df)
+    return(df)
   }
 
   num_cores <- ceiling(future::availableCores() * 0.8)
@@ -176,7 +148,7 @@ process_cdip_data_for_sites <- function(sites_file_path, start_date, end_date, o
 
   final_df <- bind_rows(stationresults) %>%
     left_join(sitemap, by = "station") %>%
-    dplyr::select(site, date_utc, Mean_Hs_m)
+    dplyr::select(site, time_utc, Hs_m)
 
   return(final_df)
 }
