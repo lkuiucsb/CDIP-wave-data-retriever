@@ -8,8 +8,7 @@ This R script provides a function to download wave data from the Coastal Data In
 -   Fetches CDIP station metadata automatically from the CDIP website.
 -   Finds the nearest CDIP station for each site.
 -   Downloads hindcast wave data (significant wave height) in parallel.
--   Calculates the daily mean significant wave height for each site.
--   Returns a single data frame with the combined data for all sites.
+-   Returns a single data frame with the combined hourly wave data for all sites.
 
 ## Dependencies
 
@@ -34,9 +33,9 @@ install.packages(c("tidyverse", "lubridate", "ncdf4", "httr", "purrr", "furrr", 
 
 ## Usage
 
-1.  **Create a `sites.csv` file:**
+1.  **Fill in the `sites.csv` file:**
 
-    Create a CSV file named `sites.csv` with the following columns:
+    Open the `sites.csv` file and fill in the site information. The file must have the following columns:
 
     -   `site`: The name of the site.
     -   `lat`: The latitude of the site.
@@ -67,6 +66,12 @@ install.packages(c("tidyverse", "lubridate", "ncdf4", "httr", "purrr", "furrr", 
     ```
 
     This will download the wave data for the sites in `sites.csv` for the specified time period and store it in the `wave_data` variable.
+
+    The output will be a data frame with the following columns:
+
+    -   `site`: The name of the site.
+    -   `time_utc`: The timestamp in UTC.
+    -   `Hs_m`: The significant wave height in meters.
 
 ## Example
 
